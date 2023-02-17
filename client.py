@@ -1,6 +1,6 @@
 import socket
  
-PORT = 9001
+PORT = int(input("Enter the port number.\n> "))
 HOST = input("Enter IP address of the server.\n> ")
  
 with socket.socket() as sock:
