@@ -4,8 +4,9 @@ import os
 LISTENING_HOST = ''
 LISTENING_PORT = 9001
 
-class Connection:
+class Connection(socket.socket):
     def __init__(self,sock,addr):
+        socket.socket.__init__(self)
         self.sock = sock
         self.ip = addr[0]
         self.port = addr[1]
@@ -41,6 +42,7 @@ with socket.socket() as lsock:
 
     while True:
         conn,addr = lsock.accept()
+        print(type(conn))
         sock = Connection(conn,addr)
         sock.filelist()
         
