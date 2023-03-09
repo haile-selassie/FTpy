@@ -7,7 +7,6 @@ PORT = int(input("Enter the port number.\n> "))
 HOST = input("Enter IP address of the server.\n> ")
 
 def main():
-
 	with socket.socket() as sock:
 			sock.setblocking(True)
 			sock.connect((HOST,PORT))
@@ -62,6 +61,13 @@ def main():
 								left-=BUFFER_SIZE
 				elif command == "exit":
 					break
+				elif command == "help":
+					print("help: show help")
+					print("ls: list local pwd")
+					print("rls: list remote pwd")
+					print("download FILENAME: download a file by name from server")
+					print("upload FILENAME: upload a file to server by name")
+					print("exit: disconnect from server")
 				else:
 					print("Invalid command.")
 
