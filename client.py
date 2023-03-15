@@ -16,21 +16,35 @@
 '''
 import socket
 import os
-from utils import *
+from net import *
  
-PORT = int(input("Enter the port number.\n> "))
-HOST = input("Enter IP address of the server.\n> ")
+#PORT = int(input("Enter the port number.\n> "))
+#HOST = input("Enter IP address of the server.\n> ")
+PORT = 2234
+HOST = "192.168.1.106"
 
 def main():
-	print("FTpy Copyright (C) 2023 https://github.com/haile-selassie")
-	print("This program comes with ABSOLUTELY NO WARRANTY; for details type `warranty'.")
-	print("This is free software, and you are welcome to redistribute it")
-	print("under certain conditions; see the GNU General Public License for more details.")
+	
 	with socket.socket() as sock:
 			sock.setblocking(True)
 			sock.connect((HOST,PORT))
 			print(f"[FTpy] Connected to {HOST}:{PORT}.")
-			while True:
+			print("FTpy Copyright (C) 2023 https://github.com/haile-selassie")
+			print("This program comes with ABSOLUTELY NO WARRANTY; for details type `warranty'.")
+			print("This is free software, and you are welcome to redistribute it")
+			print("under certain conditions; see the GNU General Public License for more details.")
+			connected = True
+
+			password = input("Enter password:\n> ").strip()
+			header_sendall(sock,LOGIN_MESSAGE.encode(FORMAT),password)
+			login_response = header_recv(sock).decode(FORMAT)
+			if login_response != LOGIN_SUCCESS_MESSAGE:
+				connected = False
+
+			home_dir = os.path.expanduser("~")
+			os.chdir(home_dir)
+
+			while connected:
 				choice = input("FTpy> ").split()
 				if len(choice) == 0:
 					continue
@@ -81,6 +95,8 @@ def main():
 							else:
 								sock.sendall(file.read(BUFFER_SIZE))
 								left-=BUFFER_SIZE
+				elif command == "cd":
+					new_dir = choice[1]
 				elif command == "exit":
 					break
 				elif command == "warranty":

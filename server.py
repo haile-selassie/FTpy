@@ -17,16 +17,27 @@
 import socket
 import os
 import threading
-from utils import *
+
+from net import *
 
 LISTENING_HOST = ''
-LISTENING_PORT = 9001
+LISTENING_PORT = 2234
 FILES = os.getcwd()+"/server-files/"
-print(os.path.exists(FILES))
+password = "12345"
 
 def handle_client(conn,addr):
     print(f"[FTpy] Established connected from {addr}")
     connected = True
+
+    login_attempt = header_recv(conn,password).decode(FORMAT)
+    if login_attempt == LOGIN_MESSAGE:
+        header_sendall(conn,LOGIN_SUCCESS_MESSAGE.encode(FORMAT))
+        connected = True
+    else:
+        header_sendall(conn,LOGIN_FAILURE_MESSAGE.encode(FORMAT))
+        connected = False
+
+
     while connected:
         cmd = header_recv(conn).decode(FORMAT).strip()
         if cmd == DISCONNECT_MESSAGE:
