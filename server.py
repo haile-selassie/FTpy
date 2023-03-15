@@ -39,35 +39,35 @@ def handle_client(conn,addr):
 
 
     while connected:
-        cmd = header_recv(conn).decode(FORMAT).strip()
+        cmd = header_recv(conn,password).decode(FORMAT).strip()
         if cmd == DISCONNECT_MESSAGE:
             connected = False
         elif cmd == LS_MESSAGE:
             file_list = "\n".join([file for file in os.listdir(FILES)])
             e_file_list = file_list.encode(FORMAT)
-            header_sendall(conn,e_file_list)
+            header_sendall(conn,e_file_list,password)
         elif cmd == DOWNLOAD_MESSAGE:
-            filename = header_recv(conn).decode(FORMAT).strip()
+            filename = header_recv(conn,password).decode(FORMAT).strip()
             filepath = FILES+filename
             if not os.path.isfile(filepath):
                 connected = False
-                header_sendall(conn,str(0).encode(FORMAT))
+                header_sendall(conn,str(0).encode(FORMAT),password)
                 continue
             filesize = os.path.getsize(filepath)
             print(filesize)
-            header_sendall(conn,str(filesize).encode(FORMAT))
+            header_sendall(conn,str(filesize).encode(FORMAT),password)
             left = filesize
             with open(filepath,"rb") as file:
                 while left > 0:
                     if left < BUFFER_SIZE:
-                        conn.sendall(file.read(left))
+                        header_sendall(conn,file.read(left),password)
                         left = 0
                     else:
-                        conn.sendall(file.read(BUFFER_SIZE))
+                        header_sendall(conn,file.read(BUFFER_SIZE),password)
                         left-=BUFFER_SIZE
         elif cmd == UPLOAD_MESSAGE:
-            filename = header_recv(conn).decode(FORMAT).strip()
-            filesize = header_recv(conn).decode(FORMAT).strip()
+            filename = header_recv(conn,password).decode(FORMAT).strip()
+            filesize = header_recv(conn,password).decode(FORMAT).strip()
             filesize = int(filesize)
             with open(FILES+filename,"wb") as newfile:      
                 left = filesize

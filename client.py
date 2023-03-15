@@ -52,17 +52,17 @@ def main():
 				if len(command) == 0:
 					continue
 				if command == "rls":
-					header_sendall(sock,LS_MESSAGE.encode(FORMAT))
-					file_list = header_recv(sock).decode().strip()
+					header_sendall(sock,LS_MESSAGE.encode(FORMAT),password)
+					file_list = header_recv(sock,password).decode().strip()
 					print(file_list)
 				elif command == "ls":
 					file_list = "\n".join([file for file in os.listdir()])
 					print(file_list)
 				elif command == "download":
 					filename = choice[1]
-					header_sendall(sock,DOWNLOAD_MESSAGE.encode(FORMAT))
-					header_sendall(sock,filename.encode(FORMAT))
-					file_size = header_recv(sock).decode(FORMAT).strip()
+					header_sendall(sock,DOWNLOAD_MESSAGE.encode(FORMAT),password)
+					header_sendall(sock,filename.encode(FORMAT),password)
+					file_size = header_recv(sock,password).decode(FORMAT).strip()
 					file_size = int(file_size)
 					if file_size == 0:
 						print(f"[FTpy] ERROR: {filename} does not exist.")
@@ -70,12 +70,9 @@ def main():
 					with open(filename,"wb") as newfile:
 						left = file_size
 						while left > 0:
-							if left < BUFFER_SIZE:
-								newfile.write(sock.recv(left))
-								left = 0
-							else:
-								newfile.write(sock.recv(BUFFER_SIZE))
-								left-=BUFFER_SIZE
+							in_data = header_recv(sock,password)
+							newfile.write(in_data)
+							left-=len(in_data)
 					print(f"[FTpy] Downloaded {filename} from {HOST}")
 				elif command == "upload":
 					filename = choice[1]
@@ -83,9 +80,9 @@ def main():
 					if not os.path.exists(filepath):
 						print(f"[FTpy] ERROR: {filename} does not exist.")
 					filesize = os.path.getsize(filepath)
-					header_sendall(sock,UPLOAD_MESSAGE.encode(FORMAT))
-					header_sendall(sock,filename.encode(FORMAT))
-					header_sendall(sock,str(filesize).encode(FORMAT))
+					header_sendall(sock,UPLOAD_MESSAGE.encode(FORMAT),password)
+					header_sendall(sock,filename.encode(FORMAT),password)
+					header_sendall(sock,str(filesize).encode(FORMAT),password)
 					left = filesize
 					with open(filepath,"rb") as file:
 						while left > 0:
@@ -122,7 +119,7 @@ def main():
 				
 
 
-			header_sendall(sock,DISCONNECT_MESSAGE.encode(FORMAT))
+			header_sendall(sock,DISCONNECT_MESSAGE.encode(FORMAT),password)
 			sock.close()
 
 if __name__ == "__main__":
